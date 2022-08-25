@@ -6,6 +6,11 @@ if (PERSISTENCE_TYPE === 'MEMORY') {
         ({productMemoryDAO}) => (productDAO = productMemoryDAO)
     );
 }
+if (PERSISTENCE_TYPE === 'FILE') {
+    import('../daos/index.js').then(
+        ({productFileDAO}) => (productDAO = productFileDAO)
+    );
+}
 
 export const getAllProducts = async (req, res) => {
     try {
@@ -30,9 +35,9 @@ export const addProduct = (req, res) => {
     }
 };
 
-export const getProductById = (req, res) => {
+export const getProductById = async(req, res) => {
     try {
-        const product = productDAO.getById(+req.params.id);
+        const product = await productDAO.getById(+req.params.id);
         if (!product) {
             return res.json({
                 message: 'Product not found',
@@ -46,20 +51,20 @@ export const getProductById = (req, res) => {
     }
 };
 
-export const updateProductById = (req, res) => {
+export const updateProductById = async(req, res) => {
     try {
         res.json({
-            message: productDAO.updateById(+req.params.id, req.body),
+            message: await productDAO.updateById(+req.params.id, req.body),
         });
     } catch (error) {
         console.log(error);
     }
 };
 
-export const deleteProductById = (req, res) => {
+export const deleteProductById = async(req, res) => {
     try {
         res.json({
-            message: productDAO.deleteById(+req.params.id),
+            message: await productDAO.deleteById(+req.params.id),
         });
     } catch (error) {
         console.log(error);

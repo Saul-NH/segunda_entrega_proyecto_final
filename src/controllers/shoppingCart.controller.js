@@ -6,6 +6,11 @@ if (PERSISTENCE_TYPE === 'MEMORY') {
         ({shoppingCartMemoryDAO}) => (shoppingCartDAO = shoppingCartMemoryDAO)
     );
 }
+if (PERSISTENCE_TYPE === 'FILE') {
+    import('../daos/index.js').then(
+        ({shoppingCartFileDAO}) => (shoppingCartDAO = shoppingCartFileDAO)
+    );
+}
 
 export const createShoppingCart = async (req, res) => {
     try {
