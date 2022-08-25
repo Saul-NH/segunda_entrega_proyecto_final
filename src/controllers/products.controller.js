@@ -1,15 +1,34 @@
 import { PERSISTENCE_TYPE } from '../config.js';
+
 let productDAO;
 
 if (PERSISTENCE_TYPE === 'MEMORY') {
-    import('../daos/index.js').then(
-        ({productMemoryDAO}) => (productDAO = productMemoryDAO)
-    );
+    import('../daos/index.js')
+        .then(({ productMemoryDAO }) => (productDAO = productMemoryDAO))
+        .catch((error) => {
+            console.error(error);
+        });
 }
+
 if (PERSISTENCE_TYPE === 'FILE') {
-    import('../daos/index.js').then(
-        ({productFileDAO}) => (productDAO = productFileDAO)
-    );
+    import('../daos/index.js')
+        .then(({ productFileDAO }) => (productDAO = productFileDAO))
+        .catch((error) => {
+            console.error(error);
+        });
+}
+
+if (PERSISTENCE_TYPE === 'MONGO') {
+    import('../database/dbConection.js')
+        .then(() => {})
+        .then(() => {
+            import('../daos/index.js').then(
+                ({ productMongoDBDAO }) => (productDAO = productMongoDBDAO)
+            );
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 }
 
 export const getAllProducts = async (req, res) => {
@@ -24,9 +43,9 @@ export const getAllProducts = async (req, res) => {
     }
 };
 
-export const addProduct = (req, res) => {
+export const addProduct = async(req, res) => {
     try {
-        productDAO.add(req.body);
+        await productDAO.add(req.body);
         res.json({
             message: 'Product added successfully',
         });
@@ -35,9 +54,9 @@ export const addProduct = (req, res) => {
     }
 };
 
-export const getProductById = async(req, res) => {
+export const getProductById = async (req, res) => {
     try {
-        const product = await productDAO.getById(+req.params.id);
+        const product = await productDAO.getById(req.params.id);
         if (!product) {
             return res.json({
                 message: 'Product not found',
@@ -51,20 +70,20 @@ export const getProductById = async(req, res) => {
     }
 };
 
-export const updateProductById = async(req, res) => {
+export const updateProductById = async (req, res) => {
     try {
         res.json({
-            message: await productDAO.updateById(+req.params.id, req.body),
+            message: await productDAO.updateById(req.params.id, req.body),
         });
     } catch (error) {
         console.log(error);
     }
 };
 
-export const deleteProductById = async(req, res) => {
+export const deleteProductById = async (req, res) => {
     try {
         res.json({
-            message: await productDAO.deleteById(+req.params.id),
+            message: await productDAO.deleteById(req.params.id),
         });
     } catch (error) {
         console.log(error);
