@@ -7,17 +7,17 @@ export default class Container {
         return this.content;
     }
     
-    getById(id) {
-        const item = this.getAll().filter((item) => item.id === id)
+    getById(id = +id) {
+        const item = this.getAll().filter((item) => item.id == id)
         return item.length == 0 ? null : item;
     }
 
-    deleteById(id) {
+    deleteById(id = +id) {
         const itemFound = this.getById(id);
         if (!itemFound) {
             return 'Resource not found'
         }
-        this.content = this.getAll().filter(item => item.id !== id)
+        this.content = this.getAll().filter(item => item.id != id)
 
         return `Resource with ID: ${id} Deleted`;
     }

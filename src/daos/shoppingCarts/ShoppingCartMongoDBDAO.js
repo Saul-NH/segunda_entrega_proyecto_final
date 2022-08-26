@@ -1,101 +1,89 @@
-import ShoppingCart from '../../containers/FileContainer.js';
-import { productFileDAO } from '../index.js';
+import ShoppingCart from '../../containers/MongoDBContainer.js';
+import { productMongoDBDAO } from '../index.js';
 
-export default class ShoppingCartMemoryDao extends ShoppingCart {
-    constructor(filename) {
-        super(filename);
+export default class ShoppingCartMongoDBDAO extends ShoppingCart {
+    constructor(model) {
+        super(model);
     }
-
     async save() {
-        let shoppingCart = {};
-        let content = await this.readFile();
-        shoppingCart.id = this.buildId(content);
-        shoppingCart.timestamp = Date.now();
-
-        content.push(shoppingCart);
-
-        await this.writeFile(content);
-
+        const shoppingCart = await this.Model.create({});
         return shoppingCart;
     }
 
     async getProducts(shoppingCartId) {
         try {
             const shoppingCart = await this.getById(shoppingCartId);
-            if (
-                !shoppingCart ||
-                !shoppingCart.products ||
-                shoppingCart.products.length === 0
-            ) {
+            if (!shoppingCart || shoppingCart.products.length == 0) {
                 return null;
             }
 
             return shoppingCart.products;
         } catch (error) {
             console.error(error);
+            if (error.kind == 'ObjectId') {
+                return 'Invalid id';
+            }
         }
     }
 
-    async addProductToShoppingCart(shoppingCartId = +shoppingCartId, productId = +productId) {
+    async addProductToShoppingCart(shoppingCartId, productId) {
         try {
             const shoppingCart = await this.getById(shoppingCartId);
             if (!shoppingCart) {
                 return 'Shopping Cart not found';
             }
-
-            const productFound = await productFileDAO.getById(productId);
+            const productFound = await productMongoDBDAO.getById(productId);
 
             if (!productFound) {
                 return 'Product not found';
             }
-
-            if (!shoppingCart.products) {
+            if (shoppingCart.products.length == 0) {
                 //First product in array
-                productFound.count = 1;
                 shoppingCart.products = [productFound];
             } else {
                 let product = shoppingCart.products.find(
-                    (product) => product.id == productId
+                    (product) => product._id == productId
                 );
                 if (!product) {
                     //Add new product to array
-                    productFound.count = 1;
                     shoppingCart.products.push(productFound);
                 } else {
                     // we increase the counter of the product plus 1
 
                     let indexProduct = shoppingCart.products.findIndex(
-                        (product) => product.id == productId
+                        (product) => product._id == productId
                     );
                     shoppingCart.products[indexProduct].count++;
                 }
             }
 
-            await this.addProduct(shoppingCartId, shoppingCart);
+            await this.Model.findByIdAndUpdate(shoppingCartId, shoppingCart);
 
             return `Product with id ${productId} added to cart`;
         } catch (error) {
             console.error(error);
+            if (error.kind == 'ObjectId') {
+                return 'Invalid id';
+            }
         }
     }
 
-    async deleteProductById(shoppingCartId = +shoppingCartId, productId = +productId) {
+    async deleteProductById(shoppingCartId, productId) {
         try {
-            let shoppingCarts = await this.getAll();
             const shoppingCart = await this.getById(shoppingCartId);
 
             if (!shoppingCart) {
                 return 'Shopping Cart not found';
             } else {
                 let product = shoppingCart.products.find(
-                    (product) => product.id == productId
+                    (product) => product._id == productId
                 );
 
                 if (!product) {
                     return 'Product not found';
                 } else {
                     let indexProduct = shoppingCart.products.findIndex(
-                        (product) => product.id == productId
+                        (product) => product._id == productId
                     );
 
                     shoppingCart.products[indexProduct].count--;
@@ -103,39 +91,23 @@ export default class ShoppingCartMemoryDao extends ShoppingCart {
                     if (shoppingCart.products[indexProduct].count === 0) {
                         // If count of product is 0 we remove it from the array
                         shoppingCart.products = shoppingCart.products.filter(
-                            (product) => product.id != productId
+                            (product) => product._id != productId
                         );
                     }
                 }
 
-                let indexShoppingCart = shoppingCarts.findIndex(
-                    (shoppingCart) => shoppingCart.id == shoppingCartId
+                await this.Model.findByIdAndUpdate(
+                    shoppingCartId,
+                    shoppingCart
                 );
-
-                shoppingCarts[indexShoppingCart].products =
-                    shoppingCart.products;
-
-                this.writeFile(shoppingCarts);
 
                 return 'Product deleted';
             }
         } catch (error) {
             console.error(error);
-        }
-    }
-
-    async addProduct(shoppingCartId, newShoppingCart) {
-        try {
-            const shoppingCarts = await this.getAll();
-
-            const index = shoppingCarts.findIndex(
-                (shoppingCart) => shoppingCart.id == shoppingCartId
-            );
-
-            shoppingCarts[index] = newShoppingCart;
-            this.writeFile(shoppingCarts);
-        } catch (error) {
-            console.error(error);
+            if (error.kind == 'ObjectId') {
+                return 'Invalid id';
+            }
         }
     }
 }

@@ -7,7 +7,7 @@ export default class ProductMemoryDao extends Product {
         this.content.push(product);
     }
 
-    updateById(id, product) {
+    updateById(id = +id, product) {
         const productFound = this.getById(id);
         if (!productFound) {
             return 'Product not found'

@@ -15,7 +15,7 @@ export default class ShoppingCartMemoryDao extends ShoppingCart {
 
     async getProducts(shoppingCartId) {
         try {
-            const shoppingCart = await this.getById(shoppingCartId);
+            const shoppingCart = await this.getById(+shoppingCartId);
             if (
                 !shoppingCart ||
                 !shoppingCart[0].products ||
@@ -30,7 +30,7 @@ export default class ShoppingCartMemoryDao extends ShoppingCart {
         }
     }
 
-    async addProductToShoppingCart(shoppingCartId, productId) {
+    async addProductToShoppingCart(shoppingCartId = +shoppingCartId, productId = +productId) {
         try {
             const shoppingCart = await this.getById(shoppingCartId);
             if (!shoppingCart) {
@@ -49,7 +49,7 @@ export default class ShoppingCartMemoryDao extends ShoppingCart {
                 shoppingCart[0].products = [productFound[0]];
             } else {
                 let product = shoppingCart[0].products.find(
-                    (product) => product.id === productId
+                    (product) => product.id == productId
                 );
                 if (!product) {
                     //Add new product to array
@@ -73,7 +73,7 @@ export default class ShoppingCartMemoryDao extends ShoppingCart {
         }
     }
 
-    async deleteProductById(shoppingCartId, productId) {
+    async deleteProductById(shoppingCartId = +shoppingCartId, productId = +productId) {
         try {
             let shoppingCarts = await this.getAll();
             const shoppingCart = await this.getById(shoppingCartId);
@@ -82,23 +82,23 @@ export default class ShoppingCartMemoryDao extends ShoppingCart {
                 return 'Shopping Cart not found';
             } else {
                 let product = shoppingCart[0].products.find(
-                    (product) => product.id === productId
+                    (product) => product.id == productId
                 );
 
                 if (!product) {
                     return 'Product not found';
                 } else {
                     let indexProduct = shoppingCart[0].products.findIndex(
-                        (product) => product.id === productId
+                        (product) => product.id == productId
                     );
 
                     shoppingCart[0].products[indexProduct].count--;
 
-                    if (shoppingCart[0].products[indexProduct].count === 0) {
+                    if (shoppingCart[0].products[indexProduct].count == 0) {
                         // If count of product is 0 we remove it from the array
                         shoppingCart[0].products =
                             shoppingCart[0].products.filter(
-                                (product) => product.id !== productId
+                                (product) => product.id != productId
                             );
                     }
                 }

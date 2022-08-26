@@ -5,10 +5,10 @@ export default class FileContainer {
         this.filename = filename;
     }
 
-    async getById(id) {
+    async getById(id = +id) {
         try {
             let content = await this.readFile();
-            let item = content.filter((item) => item.id === id);
+            let item = content.filter((item) => item.id == id);
             return content.length == 0 ? null : item[0];
         } catch (error) {
             console.error(error);
@@ -29,7 +29,7 @@ export default class FileContainer {
             let item = content.filter((item) => item.id == id)
             
             if (item.length > 0) {
-                this.writeFile(content.filter((item) => item.id !== id));
+                this.writeFile(content.filter((item) => item.id != id));
                 return 'Resource deleted'
             }else{
                 return 'Resource not found'

@@ -1,4 +1,5 @@
 import Product from '../database/models/products.model.js';
+import ShoppingCart from '../database/models/shoppingCarts.model.js';
 
 import ProductMemoryDAO from './products/ProductMemoryDAO.js';
 import ShoppingCartMemoryDao from './shoppingCarts/ShoppingCartMemoryDAO.js';
@@ -7,6 +8,7 @@ import ProductFileDAO from './products/ProductFileDAO.js';
 import ShoppingCartFileDAO from './shoppingCarts/ShoppingCartFileDAO.js';
 
 import ProductMongoDBDAO from './products/ProductMongoDBDAO.js';
+import ShoppingCartMongoDBDAO from './shoppingCarts/ShoppingCartMongoDBDAO.js';
 
 //MEMORY DAO'S
 export const productMemoryDAO = new ProductMemoryDAO();
@@ -22,3 +24,4 @@ export const shoppingCartFileDAO = new ShoppingCartFileDAO(
 
 //MONGO DB DAO'S
 export const productMongoDBDAO = new ProductMongoDBDAO(Product);
+export const shoppingCartMongoDBDAO = new ShoppingCartMongoDBDAO(ShoppingCart);
